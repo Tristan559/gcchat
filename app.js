@@ -29,3 +29,11 @@ app.get('/', routes.index);
 
 
 console.log("Express server listening on port 3000");
+
+// connect to the socket server
+//var socket = io.connect();
+
+io.sockets.on('connection', function (socket) {
+    console.log('A new user connected!');
+    socket.emit('info', { msg: 'The world is round, there is no up or down.' });
+});
