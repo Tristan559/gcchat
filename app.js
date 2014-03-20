@@ -4,7 +4,9 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , http = require('http');
+  , http = require('http')
+  , clientObject = require('./client');
+;
 
 var app = express();
 var server = app.listen(3000);
@@ -27,6 +29,19 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 
+// valid names for logging in
+var validNames = [
+
+	'gcreviewer',
+	'randy'
+];
+
+
+
+// client object
+var client = new clientObject({
+	validNamesArray: validNames
+});
 
 console.log("Express server listening on port 3000");
 
@@ -38,7 +53,9 @@ io.sockets.on('connection', function (socket) {
     		console.log('client sent: ' + data.my);
     });
 
+    // user join attempt
     socket.on('adduser', function(username) {
-    		console.log('user ' + username + " connected!");
+    	console.log ('user add result = ' + client.verifyLogin(username));
+    	console.log('user ' + username + " connected!");
     });
 });
