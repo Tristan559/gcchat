@@ -1,4 +1,4 @@
- 
+
 var sys = require('sys');
 var net = require('net');
 var User = require('./user');
@@ -17,8 +17,9 @@ var server = net.createServer(function(connection) {
     connection.on('data', function(data) {
     	user = User.getUserByConnection(connection);
 
-    	// strip newline chars from data
+    	// strip newline chars from data & trim whitespace from both ends
     	data = data.toString().replace(/(\r\n|\n|\r)/gm,"");
+    	data = data.trim();
 
     	if ( user.loggedIn === false) {
     		if ( user.setUserName(data) === true ) {

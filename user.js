@@ -7,18 +7,28 @@ User = function(connection) {
 	this.room = null;
 };
 
-// make sure name isn't already taken
-User.validateUserName = function(username) {
+// finds user by name
+// returns found user or null if no matching name
+User.findByName = function(username) {
 	username = username.toLowerCase();
 
 	var len = users.length;
 	for (var i = 0; i < len; i++) {
 		if(users[i] !== user && users[i].username) {
-			console.log('comparing names: ' + users[i].username.toLowerCase() + " ==> " + username);
 			if (users[i].username.toLowerCase() === username) {
-				return false;
+				return users[i];
 			}
 		}
+	}
+
+	return null;
+};
+
+// make sure name isn't already taken
+// returns true if name is valid (not already in use), false if name is duplicate
+User.validateUserName = function(username) {
+	if ( User.findByName(username) ) {
+		return false;
 	}
 
 	return true;
@@ -36,11 +46,6 @@ User.prototype.setUserName = function(username) {
 		user.sendMessage('Name Already Taken. Try another. ');
 		return false;
 	}
-};
-
-User.prototype.Login = function(data) {
-
-    sendMessage(this.connection, 'Login name?');
 };
 
 // sends message to this user
