@@ -3,15 +3,7 @@ var sys = require('sys');
 var net = require('net');
 var User = require('./user');
 var Room = require('./room');
-
-// util function to compare user input with command
-var compareCommand = function(userInput, command) {
-	if(userInput.toLowerCase() == command + '\n') {
-		return true;
-	}
-
-	return false;
-};
+var Command = require('./command');
 
 var server = net.createServer(function(connection) {
 	user = new User(connection);
@@ -31,18 +23,21 @@ var server = net.createServer(function(connection) {
     	if ( user.loggedIn === false) {
     		if ( user.setUserName(data) === true ) {
 	    		user.joinRoom('chat');
+	    		user.sendMessage('type /help for list of commands.');
     		}
     	}
     	else {
-	        if (data == 'exit') {
-	            console.log('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
-	        	console.log(user.username + ' disconnected.');
-	            user.connection.end('Goodbye!\n');
-	            User.deleteUser(user);
-	            return;
-	        }
+    		if ( Command.parseStringForCommand(user, data) === false ) {
+		        if (data == 'exit') {
+		            console.log('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
+		        	console.log(user.username + ' disconnected.');
+		            user.connection.end('Goodbye!\n');
+		            User.deleteUser(user);
+		            return;
+		        }
+		        user.broadcastMessageToRoom(data);
+    		}
 
-	        user.broadcastMessageToRoom(data);
     	}
     });
  
@@ -60,4 +55,5 @@ var serverport = 8080;
  
 server.listen(serverport, serveraddr);
 Room.init();
+Command.init();
 console.log('Server Created at ' + serveraddr + ':' + serverport + '\n');
