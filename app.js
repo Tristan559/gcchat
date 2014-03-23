@@ -2,79 +2,7 @@
 var sys = require('sys');
 var net = require('net');
 var User = require('./user');
-
-var roomInitData = [
-	{name: 'chat'},
-	{name: 'hottub'}
-];
-
-var rooms = [];
-
-Room = function(initData) {
-	this.name = initData.name;
-	this.users = [];
-};
-
-Room.init = function()
-{
-	for ( var i = 0; i < roomInitData.length; i++) {
-		var room = new Room(roomInitData[i]);
-		rooms.push(room);
-		sys.puts('Added room: ' + room.name);
-	}
-};
-
-Room.prototype.addUser = function(user) {
-	// make sure user isnt already in this room
-	if (this.users.indexOf(user) !== -1) {
-		return false;
-	}
-
-	this.users.push(user);
-	user.setRoom(this);
-
-	this.broadcastMessage(user, user.username + " has joined the room.");
-	return true;
-};
-
-// sends messages to all users in room except specific user
-Room.prototype.broadcastMessage = function(user, message) {
-	var len = this.users.length;
-
-	for ( var i = 0; i < len; i++ ) {
-		if (this.users[i] && this.users[i] !== user) {
-			this.users[i].sendMessage(message);
-		}
-	}
-};
-
-Room.prototype.removeUser = function(user) {
-	console.log('Room: removeUser()');
-	this.broadcastMessage(user, user.username + " has left the room.");
-
-	var idx = this.users.indexOf(user);
-
-	if (idx !== -1) {
-		this.users.splice(idx,1);
-		console.log(this.name + ": remove user " + user.username);
-	}
-
-};
-
-// join a specific room
-Room.joinRoom = function(roomName, user) {
-	var len = rooms.length;
-
-	for (var i = 0; i < len; i++) {
-		if(rooms[i].name === roomName) {
-			var room = rooms[i];
-			room.addUser(user);
-			return true;
-		}
-	}
-
-	return false;
-};
+var Room = require('./room');
 
 // util function to compare user input with command
 var compareCommand = function(userInput, command) {
@@ -89,7 +17,7 @@ var server = net.createServer(function(connection) {
 	user = new User(connection);
 	User.addUser(user);
 
-    sys.puts('User connected: ' + connection.remoteAddress + ':' + connection.remotePort); 
+    console.log('User connected: ' + connection.remoteAddress + ':' + connection.remotePort); 
     user.sendMessage('Welcome to Randy\'s Server!');
     user.sendMessage('Login Name?');
  
@@ -107,8 +35,8 @@ var server = net.createServer(function(connection) {
     	}
     	else {
 	        if (data == 'exit') {
-	            sys.puts('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
-	        	sys.puts(user.username + ' disconnected.');
+	            console.log('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
+	        	console.log(user.username + ' disconnected.');
 	            user.connection.end('Goodbye!\n');
 	            User.deleteUser(user);
 	            return;
@@ -121,7 +49,7 @@ var server = net.createServer(function(connection) {
     connection.on('end', function() { // client disconnects
     	user = User.getUserByConnection(connection);
     	if ( user ) {
-	        sys.puts(user.username + ' disconnected.');
+	        console.log(user.username + ' disconnected.');
 	        User.deleteUser(user);
     	}
     });
@@ -132,4 +60,4 @@ var serverport = 8080;
  
 server.listen(serverport, serveraddr);
 Room.init();
-sys.puts('Server Created at ' + serveraddr + ':' + serverport + '\n');
+console.log('Server Created at ' + serveraddr + ':' + serverport + '\n');
