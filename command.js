@@ -102,7 +102,7 @@ Command.exitChat = function(user, args) {
 
 // search user's text for commands
 Command.parseStringForCommand = function(user, userInput) {
-	params = userInput.split(" ");
+	params = userInput.trim().split(" ");
 
 	var len = chatCommands.length;
 

@@ -17,9 +17,9 @@ var server = net.createServer(function(connection) {
     connection.on('data', function(data) {
     	user = User.getUserByConnection(connection);
 
-    	// strip newline chars from data & trim whitespace from both ends
+    	// strip newline chars from data & trim whitespace from end
     	data = data.toString().replace(/(\r\n|\n|\r)/gm,"");
-    	data = data.trim();
+    	data = data.replace(/\s+$/,'');
 
     	if ( user.loggedIn === false) {
     		if ( user.setUserName(data) === true ) {
