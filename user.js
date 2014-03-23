@@ -11,15 +11,17 @@ User = function(connection) {
 User.validateUserName = function(username) {
 	username = username.toLowerCase();
 
-	for (var i = 0; i < users.length; i++) {
-		if(users[i].username !== null) {
+	var len = users.length;
+	for (var i = 0; i < len; i++) {
+		if(users[i] !== user && users[i].username) {
+			console.log('comparing names: ' + users[i].username.toLowerCase() + " ==> " + username);
 			if (users[i].username.toLowerCase() === username) {
 				return false;
 			}
-		} 
-
-		return true;
+		}
 	}
+
+	return true;
 };
 
 // sets user name on user if valid name, otherwise prompts user to try again
