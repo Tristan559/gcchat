@@ -85,7 +85,7 @@ User.prototype.setRoom = function(room) {
 };
 
 User.prototype.broadcastMessageToRoom = function(message) {
-	this.room.broadcastMessage(this, this.username + ':' + message);
+	this.room.broadcastMessage(null, this.username + ':' + message);
 };
 
 User.prototype.joinRoom = function(roomName) {
