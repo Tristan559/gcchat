@@ -6,6 +6,7 @@ var chatCommands = [
 	{name: '/help', callback: 'showHelp', description: '- list of commands'},
 	{name: '/join', callback: 'joinRoom', description: '[room name] - join specific chat room'},
 	{name: '/rooms', callback: 'roomList', description: '- list of available chat rooms'},
+	{name: '/users', callback: 'userList', description: '- lists users in room'},
 	{name: '/exit', callback: 'exitChat', description: '- quits chat and end connection'}
 ];
 
@@ -45,6 +46,10 @@ Command.joinRoom = function(user, params) {
 	}
 
 	console.log('Command: joinRoom. Room requested: ' + params[1]);
+};
+
+Command.userList = function(user, params) {
+	Room.displayUsers(user);
 };
 
 Command.roomList = function(user, params) {

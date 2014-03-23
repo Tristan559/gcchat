@@ -19,6 +19,26 @@ Room.init = function()
 	}
 };
 
+// lists users in a room
+Room.displayUsers = function(user) {
+	var room = user.room;
+
+	if ( room ) {
+		var userList = 'Active users in room \'' + room.name + '\'\n';
+		var len = room.users.length;
+
+		for (var i = 0; i < len; i++) {
+			userList = userList + room.users[i].username;
+
+			if ( i < len-1 ) {
+				userList = userList + '\n';
+			}
+		}
+
+		user.sendMessage(userList);
+	}
+};
+
 // displays list of rooms (and user count per room) to requesting user
 Room.displayRoomList = function(user) {
 	var output = 'Available Rooms:\n';
@@ -98,6 +118,7 @@ Room.joinRoom = function(roomName, user) {
 			}
 			room.addUser(user);
 			user.sendMessage('Joining room \'' + roomName + '\'');
+			Room.displayUsers(user);
 
 			return true;
 		}
