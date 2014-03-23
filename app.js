@@ -1,65 +1,79 @@
-// http://www.zhihua-lai.com/acm
-// 09-Feb-2013
  
 var sys = require('sys');
 var net = require('net');
-var users = [];
+var User = require('./user');
 
-User = function(connection) {
-	this.username = null;
-	this.connection = connection;
-	this.loggedIn = false;
+var roomInitData = [
+	{name: 'chat'},
+	{name: 'hottub'}
+];
+
+var rooms = [];
+
+Room = function(initData) {
+	this.name = initData.name;
+	this.users = [];
 };
 
-// make sure name isn't already taken
-User.validateUserName = function(username) {
-	username = username.toLowerCase();
-
-	for (var i = 0; i < users.length; i++) {
-		if(users[i].username != null) {
-			if (users[i].username.toLowerCase() === username) {
-				return false;
-			}
-		} 
-
-		return true;
+Room.init = function()
+{
+	for ( var i = 0; i < roomInitData.length; i++) {
+		var room = new Room(roomInitData[i]);
+		rooms.push(room);
+		sys.puts('Added room: ' + room.name);
 	}
 };
 
-// sets user name on user if valid name, otherwise prompts user to try again
-User.prototype.setUserName = function(username) {
-	if (User.validateUserName(username) === true) {
-		this.username = username;
-		this.loggedIn = true;
-		this.sendMessage('Welcome ' + username + '!');
+Room.prototype.addUser = function(user) {
+	// make sure user isnt already in this room
+	if (this.users.indexOf(user) !== -1) {
+		return false;
 	}
-	else {
-		user.sendMessage('Name Already Taken. Try another. ');
-	}
+
+	this.users.push(user);
+	user.setRoom(this);
+
+	this.broadcastMessage(user, user.username + " has joined the room.");
+	return true;
 };
 
-User.prototype.Login = function(data) {
-
-    sendMessage(this.connection, 'Login name?');
-};
-
-// sends message to specific user
-User.prototype.sendMessage = function(message) {
-	this.connection.write(message + '\n');
-};
-
-// returns user with matching connection
-User.getUserByConnection = function(connection) {
-	var len = users.length;
+// sends messages to all users in room except specific user
+Room.prototype.broadcastMessage = function(user, message) {
+	var len = this.users.length;
 
 	for ( var i = 0; i < len; i++ ) {
-		if(users[i] && users[i].connection === connection) {
-			return users[i];
+		if (this.users[i] && this.users[i] !== user) {
+			this.users[i].sendMessage(message);
+		}
+	}
+};
+
+Room.prototype.removeUser = function(user) {
+	console.log('Room: removeUser()');
+	this.broadcastMessage(user, user.username + " has left the room.");
+
+	var idx = this.users.indexOf(user);
+
+	if (idx !== -1) {
+		this.users.splice(idx,1);
+		console.log(this.name + ": remove user " + user.username);
+	}
+
+};
+
+// join a specific room
+Room.joinRoom = function(roomName, user) {
+	var len = rooms.length;
+
+	for (var i = 0; i < len; i++) {
+		if(rooms[i].name === roomName) {
+			var room = rooms[i];
+			room.addUser(user);
+			return true;
 		}
 	}
 
-	// no user with matching connection
-	return null;
+	return false;
 };
 
 // util function to compare user input with command
@@ -73,7 +87,7 @@ var compareCommand = function(userInput, command) {
 
 var server = net.createServer(function(connection) {
 	user = new User(connection);
-	users.push(user);
+	User.addUser(user);
 
     sys.puts('User connected: ' + connection.remoteAddress + ':' + connection.remotePort); 
     user.sendMessage('Welcome to Randy\'s Server!');
@@ -87,36 +101,29 @@ var server = net.createServer(function(connection) {
     	data = data.toString().replace(/(\r\n|\n|\r)/gm,"");
 
     	if ( user.loggedIn === false) {
-    		user.setUserName(data);
+    		if ( user.setUserName(data) === true ) {
+	    		user.joinRoom('chat');
+    		}
     	}
     	else {
 	        if (data == 'exit') {
 	            sys.puts('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
-	            user.connection.destroy();
-	            var idx = users.indexOf(user);
-	            if (idx != -1) {
-	                delete users[idx];
-	            }
+	        	sys.puts(user.username + ' disconnected.');
+	            user.connection.end('Goodbye!\n');
+	            User.deleteUser(user);
 	            return;
 	        }
-	        var len = users.length;
-	        for (var i = 0; i < len; i ++) { // broad cast
-	            if (users[i] != user) {
-	                if (users[i]) {
-	                    users[i].sendMessage(user.username + ':' + data);
-	                }
-	            }
-	        }
+
+	        user.broadcastMessageToRoom(data);
     	}
     });
  
     connection.on('end', function() { // client disconnects
     	user = User.getUserByConnection(connection);
-        sys.puts('Disconnected: ' + data + data.remoteAddress + ':' + data.remotePort + '\n');
-        var idx = users.indexOf(user);
-        if (idx != -1) {
-            delete users[idx];
-        }
+    	if ( user ) {
+	        sys.puts(user.username + ' disconnected.');
+	        User.deleteUser(user);
+    	}
     });
 });
  
@@ -124,4 +131,5 @@ var serveraddr = '127.0.0.1';
 var serverport = 8080;
  
 server.listen(serverport, serveraddr);
+Room.init();
 sys.puts('Server Created at ' + serveraddr + ':' + serverport + '\n');
