@@ -48,6 +48,20 @@ User.prototype.sendMessage = function(message) {
 	this.connection.write(message + '\n');
 };
 
+// returns user with matching connection
+User.getUserByConnection = function(connection) {
+	var len = users.length;
+
+	for ( var i = 0; i < len; i++ ) {
+		if(users[i] && users[i].connection === connection) {
+			return users[i];
+		}
+	}
+
+	// no user with matching connection
+	return null;
+};
+
 // util function to compare user input with command
 var compareCommand = function(userInput, command) {
 	if(userInput.toLowerCase() == command + '\n') {
@@ -65,8 +79,10 @@ var server = net.createServer(function(connection) {
     user.sendMessage('Welcome to Randy\'s Server!');
     user.sendMessage('Login Name?');
  
- 	// user writes message
+ 	// user sends message
     connection.on('data', function(data) {
+    	user = User.getUserByConnection(connection);
+
     	// strip newline chars from data
     	data = data.toString().replace(/(\r\n|\n|\r)/gm,"");
 
@@ -83,11 +99,11 @@ var server = net.createServer(function(connection) {
 	            }
 	            return;
 	        }
-	        var len = connections.length;
+	        var len = users.length;
 	        for (var i = 0; i < len; i ++) { // broad cast
-	            if (connections[i] != connection) {
-	                if (connections[i]) {
-	                    connections[i].write(connection.remoteAddress + ':' + connection.remotePort + ':' + data);
+	            if (users[i] != user) {
+	                if (users[i]) {
+	                    users[i].sendMessage(user.username + ':' + data);
 	                }
 	            }
 	        }
@@ -95,6 +111,7 @@ var server = net.createServer(function(connection) {
     });
  
     connection.on('end', function() { // client disconnects
+    	user = User.getUserByConnection(connection);
         sys.puts('Disconnected: ' + data + data.remoteAddress + ':' + data.remotePort + '\n');
         var idx = users.indexOf(user);
         if (idx != -1) {
