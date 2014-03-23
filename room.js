@@ -26,9 +26,16 @@ Room.displayUsers = function(user) {
 	if ( room ) {
 		var userList = 'Active users in room \'' + room.name + '\'\n';
 		var len = room.users.length;
+		var prefix;
 
 		for (var i = 0; i < len; i++) {
-			userList = userList + room.users[i].username;
+			if (room.users[i] === user) {
+				prefix = '* ';
+			} else {
+				prefix = '  ';
+			}
+
+			userList = userList + prefix + room.users[i].username;
 
 			if ( i < len-1 ) {
 				userList = userList + '\n';
