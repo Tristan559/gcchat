@@ -5,7 +5,7 @@
 var express = require('express')
   , routes = require('./routes')
   , http = require('http')
-  , clientObject = require('./client');
+  , userManagerObject = require('./usermanager');
 ;
 
 var app = express();
@@ -38,8 +38,8 @@ var validNames = [
 
 
 
-// client object
-var client = new clientObject({
+// user manager
+var userManager = new userManagerObject({
 	validNamesArray: validNames
 });
 
@@ -54,8 +54,16 @@ io.sockets.on('connection', function (socket) {
     });
 
     // user join attempt
+    // make sure username is non null
     socket.on('adduser', function(username) {
-    	console.log ('user add result = ' + client.verifyLogin(username));
-    	console.log('user ' + username + " connected!");
+    	var success = userManager.verifyLogin(username);
+    	console.log ('user add result = ' + success);
+
+    	if (  success ) {
+	    	console.log('user ' + username + " connected!");
+    	}
+
+    	socket.emit('loginresult', { validLogin: success});
+
     });
 });

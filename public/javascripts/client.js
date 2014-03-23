@@ -8,5 +8,17 @@ socket.on('info', function (data) {
 });
 
 socket.on('connect', function(data) {
-	socket.emit('adduser', prompt("What's your name?"));
+	attemptLogin('Hello!');
 });
+
+socket.on('loginresult', function(data) {
+	console.log('loginResult = ' + data.validLogin);
+
+	if (data.validLogin === false) {
+		attemptLogin('Name already taken or in use.');
+	}
+});
+
+function attemptLogin(msg) {
+	socket.emit('adduser', prompt(msg + " What's your name?") || '');
+};
