@@ -21,10 +21,19 @@ Room.init = function()
 
 // displays list of rooms (and user count per room) to requesting user
 Room.displayRoomList = function(user) {
-	var output = '';
-	for ( var i = 0; i < rooms.length; i++) {
-		output = output + '* ' + rooms[i].name + '(' + rooms[i].users.length + ')';
+	var output = 'Available Rooms:\n';
+	var prefix;
 
+	for ( var i = 0; i < rooms.length; i++) {
+		// add a star in front of room that user is currently in
+		if ( rooms[i] === user.room ) {
+			prefix = '* ';
+		} else {
+			prefix = '  ';
+		}
+		output = output + prefix + rooms[i].name + '(' + rooms[i].users.length + ')';
+
+		// add newline except for last line
 		if ( i < rooms.length - 1 ) {
 			output = output + '\n';
 		}
@@ -65,7 +74,6 @@ Room.prototype.removeUser = function(user) {
 
 	if (idx !== -1) {
 		this.users.splice(idx,1);
-		console.log(this.name + ": remove user " + user.username);
 	}
 
 };
@@ -77,7 +85,20 @@ Room.joinRoom = function(roomName, user) {
 	for (var i = 0; i < len; i++) {
 		if(rooms[i].name === roomName) {
 			var room = rooms[i];
+
+			// see if user is trying to join room they are already in
+			if ( room === user.room ) {
+				user.sendMessage('You are already in room \'' + room.name + '\'');
+				return true;
+			}
+
+			// remove user form their old room
+			if ( user.room ) {
+				user.room.removeUser(user);
+			}
 			room.addUser(user);
+			user.sendMessage('Joining room \'' + roomName + '\'');
+
 			return true;
 		}
 	}

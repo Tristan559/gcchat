@@ -38,7 +38,13 @@ Command.showHelp = function(user, params) {
 };
 
 Command.joinRoom = function(user, params) {
-	console.log('Command: joinRoom');
+	var roomName = params[1] || '';
+
+	if ( user.joinRoom(roomName) === false ) {
+		user.sendMessage('Room \'' + roomName + '\'' + ' not found.');
+	}
+
+	console.log('Command: joinRoom. Room requested: ' + params[1]);
 };
 
 Command.roomList = function(user, params) {

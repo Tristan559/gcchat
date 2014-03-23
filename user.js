@@ -90,8 +90,9 @@ User.prototype.broadcastMessageToRoom = function(message) {
 
 User.prototype.joinRoom = function(roomName) {
 	if ( Room.joinRoom(roomName, this) === true ) {
-		this.sendMessage('Joining room \'' + roomName + '\'');
+		return true;
 	}
+	return false;
 };
 
 module.exports = User;
