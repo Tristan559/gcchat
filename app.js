@@ -1,69 +1,110 @@
-/**
- * Module dependencies.
- */
+// http://www.zhihua-lai.com/acm
+// 09-Feb-2013
+ 
+var sys = require('sys');
+var net = require('net');
+var users = [];
 
-var express = require('express')
-  , routes = require('./routes')
-  , http = require('http')
-  , userManagerObject = require('./usermanager');
-;
+User = function(connection) {
+	this.username = null;
+	this.connection = connection;
+	this.loggedIn = false;
+};
 
-var app = express();
-var server = app.listen(3000);
-var io = require('socket.io').listen(server); // this tells socket.io to use our express server
+// make sure name isn't already taken
+User.validateUserName = function(username) {
+	username = username.toLowerCase();
 
-app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.use(express.favicon());
-  app.use(express.logger('dev'));
-  app.use(express.static(__dirname + '/public'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-});
+	for (var i = 0; i < users.length; i++) {
+		if(users[i].username != null) {
+			if (users[i].username.toLowerCase() === username) {
+				return false;
+			}
+		} 
 
-app.configure('development', function(){
-  app.use(express.errorHandler());
-});
+		return true;
+	}
+};
 
-app.get('/', routes.index);
+// sets user name on user if valid name, otherwise prompts user to try again
+User.prototype.setUserName = function(username) {
+	if (User.validateUserName(username) === true) {
+		this.username = username;
+		this.loggedIn = true;
+		this.sendMessage('Welcome ' + username + '!');
+	}
+	else {
+		user.sendMessage('Name Already Taken. Try another. ');
+	}
+};
 
-// valid names for logging in
-var validNames = [
+User.prototype.Login = function(data) {
 
-	'gcreviewer',
-	'randy'
-];
+    sendMessage(this.connection, 'Login name?');
+};
 
+// sends message to specific user
+User.prototype.sendMessage = function(message) {
+	this.connection.write(message + '\n');
+};
 
+// util function to compare user input with command
+var compareCommand = function(userInput, command) {
+	if(userInput.toLowerCase() == command + '\n') {
+		return true;
+	}
 
-// user manager
-var userManager = new userManagerObject({
-	validNamesArray: validNames
-});
+	return false;
+};
 
-console.log("Express server listening on port 3000");
+var server = net.createServer(function(connection) {
+	user = new User(connection);
+	users.push(user);
 
-io.sockets.on('connection', function (socket) {
-    console.log('A new user connected!');
-    socket.emit('info', { msg: 'The world is round, there is no up or down.' });
+    sys.puts('User connected: ' + connection.remoteAddress + ':' + connection.remotePort); 
+    user.sendMessage('Welcome to Randy\'s Server!');
+    user.sendMessage('Login Name?');
+ 
+ 	// user writes message
+    connection.on('data', function(data) {
+    	// strip newline chars from data
+    	data = data.toString().replace(/(\r\n|\n|\r)/gm,"");
 
-    socket.on('my other event', function(data) {
-    		console.log('client sent: ' + data.my);
-    });
-
-    // user join attempt
-    // make sure username is non null
-    socket.on('adduser', function(username) {
-    	var success = userManager.verifyLogin(username);
-    	console.log ('user add result = ' + success);
-
-    	if (  success ) {
-	    	console.log('user ' + username + " connected!");
+    	if ( user.loggedIn === false) {
+    		user.setUserName(data);
     	}
-
-    	socket.emit('loginresult', { validLogin: success});
-
+    	else {
+	        if (data == 'exit') {
+	            sys.puts('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
+	            user.connection.destroy();
+	            var idx = users.indexOf(user);
+	            if (idx != -1) {
+	                delete users[idx];
+	            }
+	            return;
+	        }
+	        var len = connections.length;
+	        for (var i = 0; i < len; i ++) { // broad cast
+	            if (connections[i] != connection) {
+	                if (connections[i]) {
+	                    connections[i].write(connection.remoteAddress + ':' + connection.remotePort + ':' + data);
+	                }
+	            }
+	        }
+    	}
+    });
+ 
+    connection.on('end', function() { // client disconnects
+        sys.puts('Disconnected: ' + data + data.remoteAddress + ':' + data.remotePort + '\n');
+        var idx = users.indexOf(user);
+        if (idx != -1) {
+            delete users[idx];
+        }
     });
 });
+ 
+var serveraddr = '127.0.0.1';
+var serverport = 8080;
+ 
+server.listen(serverport, serveraddr);
+sys.puts('Server Created at ' + serveraddr + ':' + serverport + '\n');
