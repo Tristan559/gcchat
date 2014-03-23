@@ -1,3 +1,4 @@
+var Room = require('./room');
 
 var helpDisplay = '';
 
@@ -41,6 +42,7 @@ Command.joinRoom = function(user, params) {
 };
 
 Command.roomList = function(user, params) {
+	Room.displayRoomList(user);
 	console.log('Command: roomList');
 };
 

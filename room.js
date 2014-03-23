@@ -19,6 +19,20 @@ Room.init = function()
 	}
 };
 
+// displays list of rooms (and user count per room) to requesting user
+Room.displayRoomList = function(user) {
+	var output = '';
+	for ( var i = 0; i < rooms.length; i++) {
+		output = output + '* ' + rooms[i].name + '(' + rooms[i].users.length + ')';
+
+		if ( i < rooms.length - 1 ) {
+			output = output + '\n';
+		}
+	}
+
+	user.sendMessage(output);
+};
+
 Room.prototype.addUser = function(user) {
 	// make sure user isnt already in this room
 	if (this.users.indexOf(user) !== -1) {
