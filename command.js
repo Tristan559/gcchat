@@ -68,12 +68,16 @@ Command.parseStringForCommand = function(user, userInput) {
 
 			if(callback) {
 				callback(user, params);
-				return true;
 			}
+
+			// return command
+			return params[0].toLowerCase();;
+
 		}
 	}
 
-	return false;
+	// return null
+	return null;
 };
 
 module.exports = Command;

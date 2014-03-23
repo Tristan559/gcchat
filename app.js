@@ -27,14 +27,19 @@ var server = net.createServer(function(connection) {
     		}
     	}
     	else {
-    		if ( Command.parseStringForCommand(user, data) === false ) {
-		        if (data == 'exit') {
-		            console.log('exit command received: ' + connection.remoteAddress + ':' + connection.remotePort + '\n');
-		        	console.log(user.username + ' disconnected.');
+    		// look for command. if found, process
+    		var command = Command.parseStringForCommand(user, data);
+
+    		if ( command ) {
+    			// need to handle exit command on this side
+		        if (command === '/exit') {
+		        	console.log(user.username + ' exited chat.');
 		            user.connection.end('Goodbye!\n');
 		            User.deleteUser(user);
 		            return;
 		        }
+    		}
+    		else {
 		        user.broadcastMessageToRoom(data);
     		}
 
