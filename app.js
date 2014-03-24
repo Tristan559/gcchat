@@ -56,10 +56,9 @@ var server = net.createServer(function(connection) {
     });
 });
  
-var serveraddr = '127.0.0.1';
 var serverport = 8080;
  
-server.listen(serverport, serveraddr);
+server.listen(serverport);
 Room.init();
 Command.init();
-console.log('Server Created at ' + serveraddr + ':' + serverport + '\n');
+console.log('Server Created using port ' + serverport + '\n');
