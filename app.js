@@ -57,6 +57,13 @@ var server = net.createServer(function(connection) {
 	        User.deleteUser(user);
     	}
     });
+
+    // handle connection errors
+    connection.on('error', function(err) {
+		console.log('server error: ' + err);
+		console.log(err.stack);
+    });
+
 });
 
 // error handling
