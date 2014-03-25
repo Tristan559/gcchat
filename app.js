@@ -5,7 +5,10 @@ var User = require('./user');
 var Room = require('./room');
 var Command = require('./command');
 
+var serverport = 8080;
+
 var server = net.createServer(function(connection) {
+
 	user = new User(connection);
 	User.addUser(user);
 
@@ -55,8 +58,25 @@ var server = net.createServer(function(connection) {
     	}
     });
 });
- 
-var serverport = 8080;
+
+// error handling
+server.on('error', function(err) {
+	if (err.code === 'EADDRINUSE') {
+		console.log('Address in use, retrying...');
+		setTimeout(function () {
+			try {
+				server.close();
+			} catch (err) {
+				console.log('server close: ' + err);
+			}
+			server.listen(serverport);
+		}, 1000);
+	}
+	else {
+		console.log('server error: ' + err);
+		console.log(err.stack);
+	}
+});
  
 server.listen(serverport);
 Room.init();
