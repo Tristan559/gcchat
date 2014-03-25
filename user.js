@@ -27,7 +27,7 @@ User.findByName = function(username) {
 // make sure name isn't already taken
 // returns true if name is valid (not already in use), false if name is duplicate
 User.validateUserName = function(username) {
-	if ( User.findByName(username) ) {
+	if ( username.length > 32 || User.findByName(username) ) {
 		return false;
 	}
 
@@ -43,7 +43,7 @@ User.prototype.setUserName = function(username) {
 		return true;
 	}
 	else {
-		user.sendMessage('Name Already Taken. Try another. ');
+		user.sendMessage('Ivalid name or already in use. Try another. ');
 		return false;
 	}
 };

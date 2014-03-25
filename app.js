@@ -80,7 +80,7 @@ server.on('error', function(err) {
 		}, 1000);
 	}
 	else {
-		console.log('server error: ' + err);
+		console.log('server error: ' + err.code);
 		console.log(err.stack);
 	}
 });
