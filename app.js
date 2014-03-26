@@ -60,7 +60,7 @@ var server = net.createServer(function(connection) {
 
     // handle connection errors
     connection.on('error', function(err) {
-		console.log('server error: ' + err);
+		console.log('connection error. code: ' + err.code);
 		console.log(err.stack);
     });
 
@@ -69,18 +69,18 @@ var server = net.createServer(function(connection) {
 // error handling
 server.on('error', function(err) {
 	if (err.code === 'EADDRINUSE') {
-		console.log('Address in use, retrying...');
+		console.log('Address in use, retrying...' + err.code);
 		setTimeout(function () {
 			try {
 				server.close();
 			} catch (err) {
-				console.log('server close: ' + err);
+				console.log('server close: ' + err.code);
 			}
 			server.listen(serverport);
 		}, 1000);
 	}
 	else {
-		console.log('server error: ' + err.code);
+		console.log('server error. code: ' + err.code);
 		console.log(err.stack);
 	}
 });
