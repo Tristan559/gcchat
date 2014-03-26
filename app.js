@@ -26,8 +26,7 @@ var server = net.createServer(function(connection) {
 
     	if ( user.loggedIn === false) {
     		if ( user.setUserName(data) === true ) {
-	    		user.joinRoom('chat');
-	    		user.sendMessage('type /help for list of commands.');
+    			user.logIn();
     		}
     	}
     	else {

@@ -26,26 +26,35 @@ User.findByName = function(username) {
 
 // make sure name isn't already taken
 // returns true if name is valid (not already in use), false if name is duplicate
-User.validateUserName = function(username) {
-	if ( username.length > 32 || User.findByName(username) ) {
+User.prototype.validateUserName = function(username) {
+	if ( User.findByName(username) ) {
+		this.sendMessage('Name already in use.');
 		return false;
 	}
 
+	if ( username.length > 32 ) {
+		this.sendMessage('Name must be max of 32 characters.');
+		return false;
+	}
+
+	// check for valid characters
+	var matchexpr = /[\w\s]+/;
+	console.log('checking \'' + username + '\' with \'' + username.match(matchexpr) + '\'');
+	if(username.match(matchexpr) != username) {
+		this.sendMessage('Invalid name. No special characters allowed in name.');
+		return false;
+	}
 	return true;
 };
 
 // sets user name on user if valid name, otherwise prompts user to try again
 User.prototype.setUserName = function(username) {
-	if (User.validateUserName(username) === true) {
+	if (this.validateUserName(username) === true) {
 		this.username = username;
-		this.loggedIn = true;
-		this.sendMessage('Welcome ' + username + '!');
 		return true;
 	}
-	else {
-		user.sendMessage('Ivalid name or already in use. Try another. ');
-		return false;
-	}
+
+	return false;
 };
 
 // sends message to this user
@@ -84,6 +93,14 @@ User.deleteUser = function(user) {
     if (idx !== -1) {
         users.splice(idx,1);
     }
+};
+
+// 'logs in' user, sets initial room and displays welcome message
+User.prototype.logIn = function() {
+	this.loggedIn = true;
+	this.sendMessage('Welcome ' + this.username + '!');
+	this.joinRoom('chat');
+	this.sendMessage('type /help for list of commands.');
 };
 
 User.prototype.setRoom = function(room) {
