@@ -27,6 +27,11 @@ User.findByName = function(username) {
 // make sure name isn't already taken
 // returns true if name is valid (not already in use), false if name is duplicate
 User.prototype.validateUserName = function(username) {
+	if ( username.length < 3 ) {
+		this.sendMessage('Name must be at least 3 characters in length.');
+		return false;
+	}
+
 	if ( User.findByName(username) ) {
 		this.sendMessage('Name already in use.');
 		return false;
