@@ -64,7 +64,12 @@ User.prototype.setUserName = function(username) {
 
 // sends message to this user
 User.prototype.sendMessage = function(message) {
-	this.connection.write(message + '\n');
+	try {
+		this.connection.write(message + '\n');
+	} catch (err) {
+		console.log('User.sendmessage error. error code: ' + err.code);
+		console.log(err);
+	}
 };
 
 // returns user with matching connection
