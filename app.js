@@ -49,6 +49,9 @@ var server = net.createServer(function(connection) {
     	}
     });
  
+ 	// user may get disconnected. This throws connection reset errors
+ 	// when node tries to grab data from now disconnected socket
+ 	// this handles these cases and removes now defunct users
  	connection.on('close', function(had_error) {
  		if (had_error === true) {
  			console.log('connection closed due to error.');
