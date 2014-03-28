@@ -52,7 +52,7 @@ var server = net.createServer(function(connection) {
  	connection.on('close', function(had_error) {
  		if (had_error === true) {
  			console.log('connection closed due to error.');
- 			user = getUserByConnection(connection);
+ 			user = User.getUserByConnection(connection);
 
  			if ( user ) {
  				User.deleteUser(user);
