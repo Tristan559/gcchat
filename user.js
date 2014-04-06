@@ -1,6 +1,8 @@
+var Room = require('./room');
+
 var users = [];
 
-User = function(connection) {
+var User = function(connection) {
 	this.username = null;
 	this.connection = connection;
 	this.loggedIn = false;
@@ -14,7 +16,7 @@ User.findByName = function(username) {
 
 	var len = users.length;
 	for (var i = 0; i < len; i++) {
-		if(users[i] !== user && users[i].username) {
+		if(users[i].username) {
 			if (users[i].username.toLowerCase() === username) {
 				return users[i];
 			}
@@ -45,7 +47,7 @@ User.prototype.validateUserName = function(username) {
 	// check for valid characters
 	var matchexpr = /[\w\s]+/;
 	console.log('checking \'' + username + '\' with \'' + username.match(matchexpr) + '\'');
-	if(username.match(matchexpr) != username) {
+	if(username.match(matchexpr) !== username) {
 		this.sendMessage('Invalid name. No special characters allowed in name.');
 		return false;
 	}

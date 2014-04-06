@@ -5,7 +5,7 @@ var roomInitData = [
 
 var rooms = [];
 
-Room = function(initData) {
+var Room = function(initData) {
 	this.name = initData.name;
 	this.users = [];
 };

@@ -1,4 +1,5 @@
 var Room = require('./room');
+var User = require('./user');
 
 var helpDisplay = '';
 
@@ -11,7 +12,7 @@ var chatCommands = [
 	{name: '/exit', callback: 'exitChat', description: '- quits chat and end connection'}
 ];
 
-Command = function()
+var Command = function()
 {
 };
 
@@ -35,22 +36,22 @@ Command.initHelpDisplay = function() {
 };
 
 Command.showHelp = function(user, args) {
-	var params = args['params'];
+	//var params = args.params;
 	user.sendMessage(helpDisplay);
 	console.log('Command: showHelp');
 };
 
 // send private message to user
 Command.privateMessage = function(user, args) {
-	var params = args['params'];
+	var params = args.params;
 	if ( params.length < 3 ) {
 		user.sendMessage('/pm: invalid params');
 		return false;
 	}
 
 	// get target user of private message
-	targetUserName = params[1];
-	targetUser = User.findByName(targetUserName);
+	var targetUserName = params[1];
+	var targetUser = User.findByName(targetUserName);
 
 	if ( !targetUser ) {
 		user.sendMessage('User \'' + targetUserName + '\'' + ' not found.');
@@ -61,8 +62,8 @@ Command.privateMessage = function(user, args) {
 	// since params are separated by whitespace, params[2] will only
 	// contain first word of message, but that's enough to find the start of
 	// the message in the user's input
-	var idx = args['userInput'].indexOf(params[2]);
-	var message = user.username + '==>' +  targetUser.username + ':' + args['userInput'].substr(idx);
+	var idx = args.userInput.indexOf(params[2]);
+	var message = user.username + '==>' +  targetUser.username + ':' + args.userInput.substr(idx);
 
 	// send message to both sender and recipient
 	user.sendMessage(message);
@@ -72,7 +73,7 @@ Command.privateMessage = function(user, args) {
 };
 
 Command.joinRoom = function(user, args) {
-	var params = args['params'];
+	var params = args.params;
 
 	var roomName = params[1] || '';
 
@@ -84,38 +85,38 @@ Command.joinRoom = function(user, args) {
 };
 
 Command.userList = function(user, args) {
-	var params = args['params'];
+	//var params = args.params;
 	Room.displayUsers(user);
 };
 
 Command.roomList = function(user, args) {
-	var params = args['params'];
+	//var params = args.params;
 	Room.displayRoomList(user);
 	console.log('Command: roomList');
 };
 
 // nothing to do here. This is a special command that will be handle by app.js
 Command.exitChat = function(user, args) {
-	var params = args['params'];
+	//var params = args.params;
 	console.log('Command: exitChat');
 };
 
 // search user's text for commands
 Command.parseStringForCommand = function(user, userInput) {
-	params = userInput.trim().split(" ");
+	var params = userInput.trim().split(" ");
 
 	var len = chatCommands.length;
 
 	for (var i = 0; i < len; i++) {
 		if(params[0] && params[0].toLowerCase() === chatCommands[i].name) {
-			callback = Command[chatCommands[i].callback];
+			var callback = Command[chatCommands[i].callback];
 
 			if(callback) {
 				callback(user, {params: params, userInput: userInput});
 			}
 
 			// return command
-			return params[0].toLowerCase();;
+			return params[0].toLowerCase();
 
 		}
 	}

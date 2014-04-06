@@ -1,5 +1,4 @@
 
-var sys = require('sys');
 var net = require('net');
 var User = require('./user');
 var Room = require('./room');
@@ -9,7 +8,7 @@ var serverport = 8080;
 
 var server = net.createServer(function(connection) {
 
-	user = new User(connection);
+	var user = new User(connection);
 	User.addUser(user);
 
     console.log('User connected: ' + connection.remoteAddress + ':' + connection.remotePort); 
@@ -60,7 +59,7 @@ var server = net.createServer(function(connection) {
  			if ( user ) {
  				User.deleteUser(user);
  			}
- 		};
+ 		}
  	});
  	
     connection.on('end', function() { // client disconnects
